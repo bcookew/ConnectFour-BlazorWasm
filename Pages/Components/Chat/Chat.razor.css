@@ -1,0 +1,39 @@
+﻿.form-container {
+    display:flex;
+    flex-direction:column;
+    padding: 3em;
+}
+
+.form-group{
+    padding: 0.5em 2em;
+    font-size: large;
+}
+
+.chat-container {
+    padding: 2em;
+}
+
+hr{
+    width: auto;
+    height: 0.1em;
+}
+label {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-container button{
+    margin: 0.5em 2em;
+    padding: 0.5em 2em;
+    width: fit-content;
+    align-self: center;
+}
+
+.connection-error {
+    margin: 1em 0;
+    text-align: center;
+    width: contain;
+    padding: 1em;
+    background-color: lightpink;
+    color: red;
+}

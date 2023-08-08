@@ -1,0 +1,102 @@
+﻿@inject GameState _state
+
+<div class="game-container">
+    <div>
+        <h3 class="title">Connect Four!</h3>
+    </div>
+    <article class="align-center">
+        <div>
+            <span class="@(string.IsNullOrEmpty(_winnerMessage) ? "d-none" : "title")">
+                @_winnerMessage 
+            </span>
+            <br class="@(string.IsNullOrEmpty(_errorMessage) ? "d-none" : string.Empty)"  />
+            <span class="@(string.IsNullOrEmpty(_errorMessage) ? "d-none" : "alert-danger")">@_errorMessage</span>
+            <br class="@(string.IsNullOrEmpty(_errorMessage) ? "d-none" : string.Empty)" />
+            <span class="@(string.IsNullOrEmpty(_currentTurn) ? "d-none" : "alert-info")">@_currentTurn</span>
+        </div>
+        <button @onclick="(() => ResetGame())">@GetButtonText()</button>
+    </article>
+    <nav>
+        @foreach (var columnIndex in Enumerable.Range(0, 7))
+        {
+            <div class="blue-button-container">
+                <button @onclick="(() => PlayPiece((byte)columnIndex))" class="blue-button">
+                    <i class="fas fa-long-arrow-down arrow"></i>
+                </button>
+            </div>
+        }
+    </nav>
+    <div class="board-row">
+        <div class="board">
+            @foreach(var positionIndex in Enumerable.Range(0,42))
+            {
+                <span class="container">
+                    <span class="hole">
+                        <span class="hole-shadow"></span>
+                    </span>
+                </span>
+            }
+            @foreach(var pieceNumber in Enumerable.Range(0, 42))
+            {
+                <span class="@_pieces[pieceNumber]"></span>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string[] _pieces = new string[42];
+    private string _winnerMessage = string.Empty;
+    private string _errorMessage = string.Empty;
+    private string _currentTurn => (_winnerMessage == string.Empty) ? $"Player {_state.PlayerTurn}'s Turn" : "";
+    private string _resetStyle => (_winnerMessage == string.Empty) ? "display: none;" : "";
+
+    protected override void OnInitialized()
+    {
+        _state.ResetBoard();
+    }
+
+    private void PlayPiece(byte column)
+    {
+        _errorMessage = string.Empty;
+
+        try
+        {
+            var currentPlayer = _state.PlayerTurn;
+            var landingRow = _state.PlayPiece(column);
+            var cssClass = $"player{currentPlayer} col{column} drop{landingRow}";
+            _pieces[_state.CurrentTurn - 1] = cssClass;
+        }
+        catch (ArgumentException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        _winnerMessage = _state.CheckForWin() switch
+        {
+            GameState.WinState.Player1_Wins => "Player 1 Wins!",
+            GameState.WinState.Player2_Wins => "Player 2 Wins!",
+            GameState.WinState.Tie => "It's a tie!",
+            _ => ""
+        };
+    }
+
+    private string GetButtonText()
+    {
+        string result = (_state.CheckForWin()) switch
+        {
+            GameState.WinState.No_Winner => "Clear",
+            GameState.WinState.Player1_Wins => "Play Again",
+            GameState.WinState.Player2_Wins => "Play Again",
+            GameState.WinState.Tie => "Tie Breaker?",
+            _ => "Reset"
+        };
+        return result;
+    }
+    private void ResetGame()
+    {
+        _pieces = new string[42];
+        _state.ResetBoard();
+        _winnerMessage = string.Empty;
+        _errorMessage = string.Empty;
+    }
+}
